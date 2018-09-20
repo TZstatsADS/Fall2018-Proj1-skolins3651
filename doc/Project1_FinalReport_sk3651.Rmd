@@ -1,0 +1,289 @@
+---
+title: "Project 1 Final Report"
+author: "Sam Kolins (sk3651)"
+date: "September 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction: What makes people happy?
+
+One day last June, some researchers posed the following question to Amazon Mechanical Turk workers:
+
+> What made you happy today?  Reflect on the past {24 hours|3 months}, and recall three actual events 
+> that happened to you that made you happy.  Write down your happy moment in a complete sentence.
+> Write three such moments.
+
+What resulted from this query is the **HappyDB** database, a corpus of over 100,000 happy moments. Inside the **data** folder of my GitHub repository exists the entire **HappyDB** database. For more information on what this database specifically contains, please check [the HappyDB public repository](https://github.com/rit-public/HappyDB). We will be explaining any of the data files in this database that we use, but we won't be providing a comprehensive summary of everything, so feel free to explore that repository and clone or download it if need be.
+
+Using this database, we wish to address the question: *what makes people happy?* Once we get a good grasp for the answer to this question, we will ask other questions that may be of interest. But for now, let's start with some basic data analysis.
+
+## Exploratory Data Analysis
+
+You may have noticed some other R Markdown documents in the **doc** folder. The first of which, `Text_Processing.Rmd`, refines the `cleaned_hm.csv` file from **HappyDB** into a more organized CSV called `processed_moments.csv`. You can find this in the **output** folder of this repository. From there, this data is combined with some demographic information (where available; happy moments that do not have a complete set of associated demographic data are deleted from this modified data set) and some more complicated code that creates a Shiny web app in the R Markdown file called `HappyDB_RShiny.Rmd`. The code chunk that initializes the actual app is at the bottom, but make sure to run the rest of the code first! The exploratory data analysis I've collected here is taken from observing the data as presented in the Shiny app, so I encourage you to run both of the aforementioned `.Rmd` files to follow along.
+
+### Most Frequent Occurrences
+
+The following is a table of the ten most frequently occurring words and how often they appear in the **HappyDB** database. Of note, the algorithms used to count these words only count them once per happy moment, so for example, if a moment mentions the word "friend" five times, it will only be represented in the count once. In other words, no matter how much you love your friends, your happy moment doesn't inflate the count!
+
+**Word** | **Frequency**
+-------- | -------------
+friend   | 10,327
+day      | 9,370
+time     | 9,197
+family   | 4,508
+watched  | 4,074
+home     | 3,966
+played   | 3,869
+feel     | 3,742
+finally  | 3,644
+found    | 3,480
+
+Some of the words in this table give us valuable information on what makes people happy while other words don't. Words like **day**, **time**, and **feel** are common enough that they could be used to describe a host of moments and sentiments. Nevertheless, the word **friend** shows up over 10,000 times and is the only word to do so. It even shows up more than the word **family**, and the race isn't even close; it appears more than twice as often! This seems to indicate that, if we had to choose only one thing that made people happy, it would be friends, and to a much greater degree than family. Rounding out the top eight are the words **watched**, **home**, and **played**, which might have different precise meanings depending on who is using them (more on this later), but seems to indicate that more relaxing and passive activities at home, such as watching movies or TV or playing games, seem to also commonly make people happy. The inclusion of the words **finally** and **found** at the bottom of the top ten are particularly interesting, because not only do these words work well together (but are they actually *used* a lot together?), they both imply different things:
+
+* The use of the word **finally** seems to imply that the actualization of an event or task (in particular, a success) makes people happy. The actual event or task can range from the completion of a project (such as this one!) or running into an old friend on the street (there's that word "friend" again), but the fact that it occurs only after some period of anticipation probably makes whatever the moment discussed was even sweeter.
+* The use of the word **found** suggests that locating a lost object or person makes a lot of people happy.
+
+There's nothing controversial about the above statements in particular. [Studies](https://www.forbes.com/sites/sujanpatel/2015/01/09/the-science-behind-motivation/#70b13b3c49d9) have found that succeeding at tasks releases dopamine into the body, making you feel satisfied and motivated. Reflecting on past accomplishments can also release serotonin into the body for an extra feeling of satisfaction or importance. Anyone could have probably guessed that those moments will make people happy, the same way people can probably guess that friends or family make people happy. What's interesting about these findings, however, is how these words managed to break the top ten over other words that one might expect to be somewhere near the top of the list. 
+
+The word **job**, for example, is down in 17th place with 3,056 occurrences, and while this is a relatively common word compared to some other words in the top 100, it fails to even break the top 15, let alone the top 10. Perhaps more alarmingly, the word **love** is even lower, ranking in at 23rd place with 2,797 occurrences. This was shocking to me because while jobs can often make people happy, they can also be extremely stressful, and while it's true that one's significant other can provide them a great deal of stress, the word **love** in a general sense doesn't have to mean romantic or sexual love. It could refer to the love between family members and friends (among other things), both of which are concepts represented much more highly in the top ten. To add to this shock, the word **bought** appears *higher* than the word **love** with 2,829 occurrences, good enough for 21st place. This seems to suggest that material wealth and items supposedly make people happier than love!
+
+If we select the top 100 words for the word cloud in the Shiny app, we can see that a wide variety of words appear. Here's a selection of some of the more notable ones:
+
+* event words, such as **birthday**, **vacation**, and **college**; many of these connect to travel in some way, like with **visit** and **trip**
+* more specific family-related words, such as **son**, **daughter**, **brother**, **sister**, **parents**, **kids** (perhaps **baby** as well), **mom**/**mother**, **husband**, **wife**, **boyfriend**, and **girlfriend**; curiously, the word **father** (or **dad**) doesn't seem to make the top 100 list
+* words related to food, such as **dinner**, **eat** (and **ate**), **cooked**, **delicious**, and **restaurant**
+* emotional words, such as **excited** and **surprise**
+* words related to finance or material consumption, which can include the food words above, but also words like **spent**, **money**, **shopping**
+* the words **started** and **finished** both appear, but despite my earlier musings about the word **finally**, the word **started** appears more often in the database
+* both **dog** and **cat** appear in the top 100, but **dog** significantly more so (by a factor of over 2 to 1)
+
+So, to summarize our findings thus far (and posit some claims), we note that:
+
+1. The single greatest thing at making people happy seems to be friends.
+2. Friends appear to make people happier than family, but many people have *specific* family members that make them happy.
+3. Being at home, perhaps while watching a movie or playing a game (possibly with others), seems to be most people's favorite activities.
+4. Completing an anticipated task is a surprisingly significant source of happiness for many people, as is finding something previously lost.
+5. Despite it being common knowledge that exercise releases endorphins, nothing about physical exercise seems to appear in the top 100.
+6. Jobs somehow seem to make people happier than love... as do material purchases?!
+7. ***Bonus**: the distribution of the word frequencies appears to be Zipfian, but thanks to [Zipf's law](https://en.wikipedia.org/wiki/Zipf%27s_law), this isn't all that surprising.*
+
+### Comparison of Proportions for Individual Terms
+
+We move on now to an investigation of individual terms stratified by different factors (gender, marital status, parenthood, and reflection period; that is, whether or not they were asked to think of a happy moment within the last 24 hours or the last 3 months). To find this analysis on the Shiny app, click the "Individual Terms" tab at the top.
+
+The data is presented in the form of a scatterplot with a dotted line cutting the graph into two diagonal pieces. **Words on this line are used equally by both compared groups (genders, married vs. single, etc.).** The further we move off this line, the more a term is used by one group over another; the further up and to the right we move, the more a word is used in general. For example, if we select the "Gender" attribute in the dropdown on the left, we can see that the word **wife** is quite high above the line; since male respondents are represented by the $y$-axis, that means men use this word in their happy moments much more than women (which is not surprising). Similarly, the word **husband** is far below the line; since female respondents are represented by the $x$-axis, that means women use this word in their happy moments more often than men (also not surprising). More interestingly, the word **husband** is farther to the right than the word **wife** is by a fair amount, suggesting that women talk about their husbands in their happy moments more than men do about their wives.
+
+Here's a series of conclusions and claims I can draw from the data which I encourage you to verify. I've organized these by what attribute I used from the dropdown.
+
+#### Comparison by Gender
+
+1. Men tend to use more terms that refer to video games and sports than women do. For example, the words **cricket**, **basketball**, and **game** are all above the line.
+2. Despite the conclusion above, exercise in general is equally important to both genders: the words **bike** and **gym** are very close to the line, although slightly above it, indicating there is probably still a slight male bias toward those activities. (Keep in mind though that, as mentioned in conclusion #5 earlier, exercise failed to make it to the top 100!)
+3. Both **alcohol** and **cigarette** appear significantly above the line, indicating that either men drink and smoke more than women or they derive more joy from it (or both).
+4. Economic success seems to be more important for men than women; the word **economic** is also substantially above the line.
+5. Cosmetics are generally more joyous for women. Note the locations of the words **jewelry**, **bracelet**, and **necklace**, for example, and how far below the line they are. This could theoretically be extended to activities that are generally associated with crafting such cosmetics, like **crochet** and **sewing**.
+6. There is a **boyfriend**/**girlfriend** split similar to the one I explained about **husband**/**wife** earlier. Women use **boyfriend** more than men use **girlfriend**, which also lines up with **husband**/**wife**.
+7. Interestingly, women use the word **husband** more than they use the word **boyfriend** while men seem to use **wife** and **girlfriend** equally (although it should be noted that **gf**, which likely also refers to a girlfriend, is used a decent amount as well).
+
+#### Comparison by Marital Status
+
+1. Unsurprisingly, words related to being married (**husband**/**wife**/**spouse**) are used more often by married couples than words related to being in a relationship that has not yet reached marriage (**boyfriend**/**girlfriend**, as well as **fiance(e)**). This extends to non-romantic relationships too, like **roommate**.
+2. Because college students are generally not married, most college-related words are more strongly associated to single people. This includes **calculus** (as in calculus classes), **midterm**, and **semester**.
+3. Obviously, **crush** is used more by single people because *ideally*, married people are not crushing on anyone except each other.
+4. Words like **couple** and **affectionate** are used in equal proportions by both married and single people, indicating that romantic happiness is equally important to both married and single people.
+5. With the exception of the words in conclusion #1, the most commonly used words in general (in the top 100 above) tend to be used equally likely by both married and single people, which suggests that those concepts (friends, family, money, etc.) are equally important to both groups.
+6. It's not surprising that the word **anniversary** is both used frequently by married couples and is biased towards them.
+7. Most family words that I found are biased toward married people (like **grandchildren**) because married people are more likely to be heading their own families.
+
+#### Comparison by Parenthood
+
+1. Obviously, any word related to children or words a child or affectionate spouse might say (**mommy**, **daddy**, **kindergarten**, **daycare**, **toddler**, **grandkids**, **daughter**, **son**, **kid(s)**, **boy**, etc.) is used *substantially* more by parents.
+2. Many of the college-related words I mentioned earlier in the Comparison by Marital Status section are used more by non-parents because there is a strong correlation between college students and being neither married nor a parent.
+3. In fact, words used more often by married couples tend to *also* be words used more often by parents because of a correlation between those two groups. Check the locations of words like **husband**/**wife** and contrast that to the locations of words like **boyfriend**/**girlfriend**.
+4. The word **family** is used equally by both groups, but the word **friend** is used more by non-parents. I suspect this means non-parents have more time to interact with friends than parents, who spend most of their time worrying about their kids.
+5. The word **offsite** has an interestingly large bias toward parents. I'm not entirely sure what this means, but Google tells me that offsite pickup locations for students getting out of elementary school for the day are important to parents, so that might explain it.
+6. The word **buddhist** has a strong bias toward parents and I have *no idea why*.
+
+#### Comparison by Reflection Period
+
+1. If we look at the shape of the cluster of points in this comparison plot and compare it to the shape in the other plots, we see that points on average extend out farther and are more clustered together, indicating less variance. This makes sense, as what makes people happy over the last day is generally not different from what makes people happy three months ago...
+2. ...Except for events that are fixed to a particular calendar date, which is why **valentines**, **easter**, **february**, and **march** appear so high above the line (the 3-month group is represented by the $y$-axis).
+3. Along these lines, college events tend to also be biased toward the 3-month group because the three-month timeframe covers most of a college semester. Note the location of words like **semester** and **examination**.
+4. Big life events tend to be remembered more fondly over longer periods of time, which is why the 3-month group tends to mention them more. Words like **graduation**, **bachelors**, **concert**, and **adopted** could fall under this category.
+5. The word **accepted** is biased toward the 3-month group. I was confused about this initially, but then realized this probably meant an acceptance letter from a college and thus would fall under the big life event category mentioned in conclusion #4.
+6. I was also confused by **cinco** being biased toward 3-monthers until I realized that probably meant "Cinco de Mayo" (May 5) and is thus a fixed calendar date (see conclusion #2).
+7. Interestingly, the word **birthday** seems somewhat exempt from the fixed calendar date conclusion. It *is* still biased toward the 3-month group, but the bias is much smaller than other words mentioned previously. Of course, someone's birthday would easily be a notable 24-hour event, but it would have to have happened in the past day for someone to make note of it. Perhaps the researchers found enough respondents who were celebrating their (or someone else's) birthday?
+8. Of course, the more popular words like **family** don't have a significant bias in either direction as the joy those things can bring is both timeless and fairly regular in most people's lives.
+9. The word **asleep** is more biased in the 24-hour direction, perhaps because the joys of sleep could be a default response for people who had an uneventful previous 24 hours (whereas you could *surely* think of something more exciting in the past three months).
+10. In fact, the words biased in the 24-hour direction in general seem more... random, for lack of a better term. Words like **cheese** and **cookies** (and **taj mahal**?!), for example. It's possible that respondents in this group were thinking more of whatever came to their minds from their past day that made them happy without thinking too deep about it as the average day for most people is probably pretty neutral in emotion overall.
+
+## The Deeper Questions
+
+The results above were things we mostly found just by messing around with the Shiny app data. But what else can we find?
+
+### Bigrams Analysis
+
+I wanted to address some of the earlier questions posed in the Most Frequent Occurrences section, namely
+
+1. Can we infer what kinds of activities people mean when they use words such as **watched**, **played**, and so on?
+2. To what degree does the bigram **finally found** appear?
+
+Both of these questions can be addressed by looking at ***bigrams***, or phrases made up of two words. Below is a table that gives the 80 most common bigrams.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+# copying selected code chunks from HappyDB_RShiny.Rmd so that we have actually usable data
+
+library(tidyverse)
+library(tidytext)
+library(DT)
+library(scales)
+library(wordcloud2)
+library(gridExtra)
+library(ngram)
+library(shiny)
+
+hm_data <- read_csv("../output/processed_moments.csv")
+
+urlfile <- 'https://raw.githubusercontent.com/rit-public/HappyDB/master/happydb/data/demographic.csv'
+demo_data <- read_csv(urlfile)
+
+hm_data <- hm_data %>%
+  inner_join(demo_data, by = "wid") %>%
+  select(wid,
+         original_hm,
+         gender, 
+         marital, 
+         parenthood,
+         reflection_period,
+         age, 
+         country, 
+         ground_truth_category, 
+         text) %>%
+  mutate(count = sapply(hm_data$text, wordcount)) %>%
+  filter(gender %in% c("m", "f")) %>%
+  filter(marital %in% c("single", "married")) %>%
+  filter(parenthood %in% c("n", "y")) %>%
+  filter(reflection_period %in% c("24h", "3m")) %>%
+  mutate(reflection_period = fct_recode(reflection_period, 
+                                        months_3 = "3m", hours_24 = "24h"))
+
+bag_of_words <-  hm_data %>%
+  unnest_tokens(word, text)
+
+word_count <- bag_of_words %>%
+  count(word, sort = TRUE)
+
+hm_bigrams <- hm_data %>%
+  filter(count != 1) %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2)
+
+bigram_counts <- hm_bigrams %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  count(word1, word2, sort = TRUE)
+```
+
+```{r, echo = FALSE, warning = FALSE}
+library(knitr)
+library(kableExtra)
+
+top20_bigrams <- as.data.frame(head(sort(table(hm_bigrams$bigram), decreasing = TRUE), 20))
+colnames(top20_bigrams) <- c("Bigram", "Frequency")
+
+sorted_bigrams <- sort(table(hm_bigrams$bigram), decreasing = TRUE)
+sorted_bigrams <- as.data.frame(sorted_bigrams)
+next20_bigrams1 <- sorted_bigrams[21:40,]
+next20_bigrams2 <- sorted_bigrams[41:60,]
+next20_bigrams3 <- sorted_bigrams[61:80,]
+
+top80_bigrams <- cbind(top20_bigrams, next20_bigrams1, next20_bigrams2, next20_bigrams3)
+colnames(top80_bigrams) <- rep(colnames(top20_bigrams), 4)
+rownames(top80_bigrams) <- NULL
+
+kable(top80_bigrams)  %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+```{r, echo = FALSE}
+bigrams <- sorted_bigrams[,1]
+freq <- sorted_bigrams[,2]
+colnames(sorted_bigrams) <- c("Bigram", "Frequency")
+```
+
+We make significantly more detailed conclusions and conjectures about the data based solely on looking at the bigrams. The most common bigram is **spend time** at 774 occurrences, which doesn't really tell us much because it's so vague, but the second-most common bigram is, interestingly enough, **video game** at 718 occurrences, which means a lot of people find video games to be a source of happiness. Other interestingly specific bigrams that top the charts are **ice cream** (505), **watched movie** (482), **birthday party** (448), **mother day** (412), **met friend** (275), **friend birthday** (260), **read book** (240), **celebrated birthday** (235), **family friend** (227), **bought car** (224), **grocery store** (222), and **team won** (208).
+
+One of the greatest things about studying the bigrams of a corpus like this is that it gives us insight into the interplay between concepts that, in this case, tend to make people happy. For example, the word **birthday**, which is decently common in its own right (but doesn't break the top ten), finds itself in many of the top bigrams, often combined with other relatively common words like **party** (which is in the top 100) and **friend** (literally the most common concept word in the corpus). The bigram **family friend** combines two of the most common words in this corpus, but can have a myriad of possible other meanings, ranging from a fun activity with family and friends to literally meeting a *family friend*, i.e. someone you know as a friend of a family member or your family in general, like a neighbor. We will discuss this interplay in a little more detail when we look at bigrams in the **watched**, **played**, and **home** categories to try to glean more specific insight on what makes people happy.
+
+Note that **finally found** is not in this table, but it *is* in the list of bigrams, provided we dig a little bit. It is the `r which(bigrams == "finally found")`th most common bigram and it appears a total of `r sorted_bigrams[which(bigrams == "finally found"), ]` times. Compared to most bigrams in the list, this is fairly common, but in comparison to over three thousands individual uses of both the words **finally** and **found**, it's not very common at all. This answers question 2. Now, for question 1, we can isolate all the bigrams that contain **watched**, all the bigrams that contain **played**, and all the bigrams that contain **home**.
+
+```{r, echo = FALSE}
+locate.word <- function(str) {
+  index <- which(apply(as.matrix(bigrams), 1, function(x) grepl(str, x, fixed = TRUE)))
+  return(sorted_bigrams[index, ])
+}
+```
+
+It turns out that there are far too many bigrams with all three of those words in them, so we're going to limit our analysis to only the 20 most frequently occurring bigrams in each category as they quickly get infrequent.
+
+```{r, echo = FALSE}
+top20_watched <- head(locate.word("watched"), 20)
+top20_played <- head(locate.word("played"), 20)
+top20_home <- head(locate.word("home"), 20)
+activities <- cbind(top20_watched, top20_played, top20_home)
+rownames(activities) <- NULL
+
+kable(activities) %>%
+  kable_styling("striped") %>%
+  add_header_above(c("watched" = 2, "played" = 2, "home" = 2))
+```
+
+We can draw the following conclusions from this table:
+
+1. The single most common bigram involving **watched** was **watched movie** at 482 occurrences. This suggests that watching movies brings happiness to a lot of people. But is it the most common form of watching-related happiness? Maybe not. The **watched favorite** bigram in second place is ambiguous, but if we continue down the list, we see a host of TV-related watching bigrams, including **watched tv**, **watched episode**, **watched season**, **binge watched**, and **watched video**. It's possible that the sum of these occurrences overtakes the **watched movie** bigram at the top of the list, but there might also be other movie-related bigrams here. However, because a portion of movie-watching timeshares would be expected to go toward movie theaters, I believe TV watching outstrips movie watching in terms of happiness.
+2. Lots of people derive happiness from watching *family members*. We see **watched daughter** here in fifth place at 96 occurrences and **watched son** close behind at 94. Further down, we find **watched kids**. This is nowhere near as common other watching-related moments, but since **family** is such a common word in general as noted in our previous analysis, this could be an underrepresented form of happy moment for a significant portion of the overall population.
+3. Most people who derive enjoyment from *playing* something probably played video games. The bigram **played game** tops the charts at 300 occurrences with **played video** close behind at 281 and **game played** in a distant (but still dominant) third with 171. In fact, the only top ten bigram that can unambiguously be disconnected from the concept of playing video games is **played dog** at 106 occurrences as this clearly means playing with one's dog. However, it *is* fourth place on this list, so it indicates that playing with one's dog (or one's pets in general) could be a significant source of happiness from the **played** crowd.
+4. There is a stronger association between family and games in terms of happiness than there is for family and watching TV or movies. More of the top bigrams in this table in the **played** category combine **played** with a family or friend term (**son played**, **friend played**, **daughter played**, **kids played**, and so on) than in the **watched** category.
+5. In general, fewer people derive happiness from playing games than watching TV *or* movies, although we kind of already knew this as, if we go back to the very first table, the word **watched** appears more frequently than the word **played**.
+6. Interestingly, more people derive happiness from *returning* home than passively *being* home (i.e. **home** is made into more of an active than passive thing), which is not what I expected. Three out of the top five **home** bigrams use the concept of "home" in an active way (**brought home**, **return home**, and **coming home**), and moreover, **brought home** is the chart-topper at 144 occurrences. The only definitely passive use of **home** in the top five is the third-place **home** bigram, **home day** (115 occurrences), which suggests a lot of people derive happiness from spending the day at home, which is certainly more passive than being outside and returning home. Going further down the list, we see **reached home** and **arrived home**, also active, as well as **moved home**, which doesn't quite mean the same thing, but is active nonetheless.
+7. The bigram **husband home** is in fifth place with 80 occurrences, but **wife home** is significantly farther down in the table (but still in the top 20) at just 50 occurrences. Does this mean wives derive more pleasure from their husbands being home as opposed to the other way around? Or do most of the married respondents have stay-at-home wives and as such, their wives being home isn't as much of a notable occurrence?
+8. As opposed to the **watched** and **played** categories which tend to be semantically consistent, there is a bit more semantic variance in the usage of the term **home**. In seventh place is the bigram **home town** at 68 occurrences, which doesn't directly involve homes at all (at least, not in the way the term **home** is used in say, **brought home**). People who used that as their happy moment likely visited their hometown recently. Another example of this is **home cooked** at 49 occurrences, which has more to do with food than homes (although it can be presumed home-cooked meals are mostly had at home).
+9. None of the **home** bigrams break more than 150 occurrences whereas at least three bigrams in the other categories exceed that mark. However, if we look at the original table, the word **home** occurs more often than the word **played** (but less than **watched**). Therefore, there must be more overall variance in the kinds of bigrams used that involve the word **home**, whereas the bigrams used in the other two categories are a bit more consistent. This could tie in with the previous conclusion; if there are more semantic uses for the word **home** that can be associated with happy moments, you would expect greater variance in the bigrams used that contain the word **home**.
+
+We will conclude this report by briefly discussing the distribution of the bigrams that we have just studied. Here is a bar graph of the frequencies of the top 80 bigrams.
+
+```{r, echo = FALSE}
+big <- sorted_bigrams[1:80, 1]
+fr <- sorted_bigrams[1:80, 2]
+dftop80 <- as.data.frame(sorted_bigrams[1:80, ])
+
+g <- ggplot(dftop80, aes(x = big, y = fr))
+g + geom_bar(stat = "identity") + ggtitle("Distribution of HappyDB Top 80 Bigrams") + xlab("Bigram") + ylab("Frequency") + theme(axis.text.y = element_text(size = 5)) + coord_flip()
+```
+
+Much as we observed with the single words, the distribution of the bigrams appears to be Zipfian (or some other form of exponential). We see this to be the case with the **watched**, **played**, and **home** bigrams as well, as shown in the bar graph below.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+actdf <- cbind(activities[, 2], activities[, 4], activities[, 6])
+actdf <- cbind(1:20, actdf)
+colnames(actdf) <- c("Rank", "WatchFreq", "PlayFreq", "HomeFreq")
+
+library(reshape2)
+actdf <- melt(actdf)
+actdf <- actdf[-(1:20), ]
+colnames(actdf) <- c("Rank", "FreqType", "Freq")
+rownames(actdf) <- NULL
+
+ggplot(actdf, aes(x = Rank, y = Freq, fill = FreqType)) +
+  geom_bar(stat = "identity") +
+  scale_fill_discrete(name = "Frequency Type", labels = c("watch", "play", "home"))
+
+```
+
+## Conclusion
+
+Throughout this report, we've conducted a deep analysis on the things that make us happy using the **HappyDB** database. We found that, while there is a plethora of things that please, excite, and satisfy us, if we had to narrow it down to a single concept, it would be ***friendship***. Of course, that's not the only thing; ***family*** is very important to us as well. Still, there were surprises lurking in the frequencies of words used in the 100,000+ happy moments catalogued in the corpus, like how jobs apparently make people happier than love. We then dug deeper into the data, looking to see which words were used more often by people of a particular gender or marital status, among other things. Finally, we dug deeper still, investigating bigrams to find out if we could narrow down the particular activities that people tended to enjoy in general. And just above, we concluded our report by visually examining the distributions of our data.
+
+So, now that we've finally finished our journey through the **HappyDB** database, I ask you, the reader, to go out and do whatever makes *you* happy!
